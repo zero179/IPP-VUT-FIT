@@ -40,7 +40,7 @@ while($line=fgets(STDIN))
                     echo ("\t\t<arg1 type=\"symb\">".$splitted[2]."<\arg1>")."\n";
                     echo ("\t</instruction")."\n";
                 }
-                elseif (preg_match("/^int@[0-9]{3}/",$splitted[2])){
+                elseif (preg_match("/^int@[0-9]*/",$splitted[2])){
                     echo("\t<instruction order=\"kokot\" opcode=".strtoupper($splitted[0]).">\n");
                     echo ("\t\t<arg1 type=\"var\">".$splitted[1]."<\arg1>")."\n";
                     echo ("\t\t<arg1 type=\"symb\">".$splitted[2]."<\arg1>")."\n";
@@ -102,13 +102,22 @@ while($line=fgets(STDIN))
             break;
 
         case 'CALL':
+            if (preg_match("/[a-zA-Z?!*%#$&_-][a-zA-Z0-9]*/", $splitted[1])){
+                echo("\t<instruction order=\"kokot\" opcode=" . strtoupper($splitted[0]) . ">\n");
+                echo ("\t\t<arg1 type=\"label\">" . $splitted[1] . "<\arg1>") . "\n";
+                echo ("\t</instruction") . "\n";
+            }
+            else{
+                echo("pojebany kokotJ\n");
+            }
+            break;
 
         case 'RETURN':
 
         case 'ADD':
             if (preg_match("/^(GF|TF|LF)@[a-zA-Z?!*%#$&_-][a-zA-Z0-9]*/", $splitted[1])) {
-                if (preg_match("/^int@[0-9]{3}/", $splitted[2])) {
-                    if (preg_match("/^int@[0-9]{3}/", $splitted[3])) {
+                if (preg_match("/^int@[0-9]*/", $splitted[2])) {
+                    if (preg_match("/^int@[0-9]*/", $splitted[3])) {
                         echo("\t<instruction order=\"kokot\" opcode=" . strtoupper($splitted[0]) . ">\n");
                         echo ("\t\t<arg1 type=\"var\">" . $splitted[1] . "<\arg1>") . "\n";
                         echo ("\t\t<arg2 type=\"symb1\">" . $splitted[2] . "<\arg2>") . "\n";
@@ -132,8 +141,8 @@ while($line=fgets(STDIN))
 
         case 'SUB':
             if (preg_match("/^(GF|TF|LF)@[a-zA-Z?!*%#$&_-][a-zA-Z0-9]*/", $splitted[1])) {
-                if (preg_match("/^int@[0-9]{3}/", $splitted[2])) {
-                    if (preg_match("/^int@[0-9]{3}/", $splitted[3])) {
+                if (preg_match("/^int@[0-9]*/", $splitted[2])) {
+                    if (preg_match("/^int@[0-9]*/", $splitted[3])) {
                         echo("\t<instruction order=\"kokot\" opcode=" . strtoupper($splitted[0]) . ">\n");
                         echo ("\t\t<arg1 type=\"var\">" . $splitted[1] . "<\arg1>") . "\n";
                         echo ("\t\t<arg2 type=\"symb1\">" . $splitted[2] . "<\arg2>") . "\n";
@@ -157,8 +166,8 @@ while($line=fgets(STDIN))
 
         case 'MUL':
             if (preg_match("/^(GF|TF|LF)@[a-zA-Z?!*%#$&_-][a-zA-Z0-9]*/", $splitted[1])) {
-                if (preg_match("/^int@[0-9]{3}/", $splitted[2])) {
-                    if (preg_match("/^int@[0-9]{3}/", $splitted[3])) {
+                if (preg_match("/^int@[0-9]*/", $splitted[2])) {
+                    if (preg_match("/^int@[0-9]*/", $splitted[3])) {
                         echo("\t<instruction order=\"kokot\" opcode=" . strtoupper($splitted[0]) . ">\n");
                         echo ("\t\t<arg1 type=\"var\">" . $splitted[1] . "<\arg1>") . "\n";
                         echo ("\t\t<arg2 type=\"symb1\">" . $splitted[2] . "<\arg2>") . "\n";
@@ -182,8 +191,8 @@ while($line=fgets(STDIN))
 
         case 'IDIV':
             if (preg_match("/^(GF|TF|LF)@[a-zA-Z?!*%#$&_-][a-zA-Z0-9]*/", $splitted[1])) {
-                if (preg_match("/^int@[0-9]{3}/", $splitted[2])) {
-                    if (preg_match("/^int@[0-9]{3}/", $splitted[3])) {
+                if (preg_match("/^int@[0-9]*/", $splitted[2])) {
+                    if (preg_match("/^int@[0-9]*/", $splitted[3])) {
                         echo("\t<instruction order=\"kokot\" opcode=" . strtoupper($splitted[0]) . ">\n");
                         echo ("\t\t<arg1 type=\"var\">" . $splitted[1] . "<\arg1>") . "\n";
                         echo ("\t\t<arg2 type=\"symb1\">" . $splitted[2] . "<\arg2>") . "\n";
@@ -207,7 +216,7 @@ while($line=fgets(STDIN))
 
         case 'INT2CHAR':
             if (preg_match("/^(GF|TF|LF)@[a-zA-Z?!*%#$&_-][a-zA-Z0-9]*/", $splitted[1])) {
-                if (preg_match("/^int@[0-9]{3}/", $splitted[2])) {
+                if (preg_match("/^int@[0-9]*/", $splitted[2])) {
                     echo("\t<instruction order=\"kokot\" opcode=" . strtoupper($splitted[0]) . ">\n");
                     echo ("\t\t<arg1 type=\"var\">" . $splitted[1] . "<\arg1>") . "\n";
                     echo ("\t\t<arg2 type=\"symb1\">" . $splitted[2] . "<\arg2>") . "\n";
@@ -224,8 +233,8 @@ while($line=fgets(STDIN))
 
         case 'STRI2INT':
             if (preg_match("/^(GF|TF|LF)@[a-zA-Z?!*%#$&_-][a-zA-Z0-9]*/", $splitted[1])) {
-                if (preg_match("/^int@[0-9]{3}/", $splitted[2])) {
-                    if (preg_match("/^int@[0-9]{3}/", $splitted[3])) {
+                if (preg_match("/^int@[0-9]*/", $splitted[2])) {
+                    if (preg_match("/^int@[0-9]*/", $splitted[3])) {
                         echo("\t<instruction order=\"kokot\" opcode=" . strtoupper($splitted[0]) . ">\n");
                         echo ("\t\t<arg1 type=\"var\">" . $splitted[1] . "<\arg1>") . "\n";
                         echo ("\t\t<arg2 type=\"symb1\">" . $splitted[2] . "<\arg2>") . "\n";
@@ -248,8 +257,139 @@ while($line=fgets(STDIN))
             break;
 
         case 'READ':
-            
+
         case 'WRITE':
+
+        case 'CONCAT':
+            if (preg_match("/^(GF|TF|LF)@[a-zA-Z?!*%#$&_-][a-zA-Z0-9]*/", $splitted[1])) {
+                if (preg_match("/^int@[0-9]*/", $splitted[2])) {
+                    if (preg_match("/^int@[0-9]*/", $splitted[3])) {
+                        echo("\t<instruction order=\"kokot\" opcode=" . strtoupper($splitted[0]) . ">\n");
+                        echo ("\t\t<arg1 type=\"var\">" . $splitted[1] . "<\arg1>") . "\n";
+                        echo ("\t\t<arg2 type=\"symb1\">" . $splitted[2] . "<\arg2>") . "\n";
+                        echo ("\t\t<arg3 type=\"symb2\">" . $splitted[3] . "<\arg3>") . "\n";
+                        echo ("\t</instruction") . "\n";
+                    }
+                    else{
+                        echo("pojebany kokotJ\n");
+                    }
+                    break;
+                }
+                else{
+                    echo("pojebany kokotH\n");
+                }
+                break;
+            }
+            else{
+                echo("pojebanyy kokotK\n");
+            }
+            break;
+
+        case 'STRLEN':
+            if (preg_match("/^(GF|TF|LF)@[a-zA-Z?!*%#$&_-][a-zA-Z0-9]*/", $splitted[1])) {
+                if (preg_match("/^int@[0-9]*/", $splitted[2])) {
+                    echo("\t<instruction order=\"kokot\" opcode=" . strtoupper($splitted[0]) . ">\n");
+                    echo ("\t\t<arg1 type=\"var\">" . $splitted[1] . "<\arg1>") . "\n";
+                    echo ("\t\t<arg2 type=\"symb1\">" . $splitted[2] . "<\arg2>") . "\n";
+                }
+                else{
+                    echo("pojebany kokootJ\n");
+                }
+                break;
+            }
+            else{
+                echo("poojebany kokouatK\n");
+            }
+            break;
+
+        case 'GETCHAR':
+            if (preg_match("/^(GF|TF|LF)@[a-zA-Z?!*%#$&_-][a-zA-Z0-9]*/", $splitted[1])) {
+                if (preg_match("/^int@[0-9]*/", $splitted[2])) {
+                    if (preg_match("/^int@[0-9]*/", $splitted[3])) {
+                        echo("\t<instruction order=\"kokot\" opcode=" . strtoupper($splitted[0]) . ">\n");
+                        echo ("\t\t<arg1 type=\"var\">" . $splitted[1] . "<\arg1>") . "\n";
+                        echo ("\t\t<arg2 type=\"symb1\">" . $splitted[2] . "<\arg2>") . "\n";
+                        echo ("\t\t<arg3 type=\"symb2\">" . $splitted[3] . "<\arg3>") . "\n";
+                        echo ("\t</instruction") . "\n";
+                    }
+                    else{
+                        echo("pojebany kokotJ\n");
+                    }
+                    break;
+                }
+                else{
+                    echo("pojebany kokotH\n");
+                }
+                break;
+            }
+            else{
+                echo("pojeebany kokotK\n");
+            }
+            break;
+
+        case 'SETCHAR':
+            if (preg_match("/^(GF|TF|LF)@[a-zA-Z?!*%#$&_-][a-zA-Z0-9]*/", $splitted[1])) {
+                if (preg_match("/^int@[0-9]*/", $splitted[2])) {
+                    if (preg_match("/^int@[0-9]*/", $splitted[3])) {
+                        echo("\t<instruction order=\"kokot\" opcode=" . strtoupper($splitted[0]) . ">\n");
+                        echo ("\t\t<arg1 type=\"var\">" . $splitted[1] . "<\arg1>") . "\n";
+                        echo ("\t\t<arg2 type=\"symb1\">" . $splitted[2] . "<\arg2>") . "\n";
+                        echo ("\t\t<arg3 type=\"symb2\">" . $splitted[3] . "<\arg3>") . "\n";
+                        echo ("\t</instruction") . "\n";
+                    }
+                    else{
+                        echo("pojebany kokotJ\n");
+                    }
+                    break;
+                }
+                else{
+                    echo("pojebany kokotH\n");
+                }
+                break;
+            }
+            else{
+                echo("pojjjebany kokotK\n");
+            }
+            break;
+
+        case 'TYPE':
+            if (preg_match("/^(GF|TF|LF)@[a-zA-Z?!*%#$&_-][a-zA-Z0-9]*/", $splitted[1])) {
+                if (preg_match("/^int@[0-9]*/", $splitted[2])) {
+                    echo("\t<instruction order=\"kokot\" opcode=" . strtoupper($splitted[0]) . ">\n");
+                    echo ("\t\t<arg1 type=\"var\">" . $splitted[1] . "<\arg1>") . "\n";
+                    echo ("\t\t<arg2 type=\"symb1\">" . $splitted[2] . "<\arg2>") . "\n";
+                }
+                else{
+                    echo("pojjjjebany kokootJ\n");
+                }
+                break;
+            }
+            else{
+                echo("pojebany kokouatK\n");
+            }
+            break;
+
+        case 'LABEL':
+            if (preg_match("/[a-zA-Z?!*%#$&_-][a-zA-Z0-9]*/", $splitted[1])){
+                echo("\t<instruction order=\"kokot\" opcode=" . strtoupper($splitted[0]) . ">\n");
+                echo ("\t\t<arg1 type=\"label\">" . $splitted[1] . "<\arg1>") . "\n";
+                echo ("\t</instruction") . "\n";
+            }
+            else{
+                echo("pojebanyy kokotJ\n");
+            }
+            break;
+
+        case 'JUMP':
+            if (preg_match("/[a-zA-Z?!*%#$&_-][a-zA-Z0-9]*/", $splitted[1])){
+                echo("\t<instruction order=\"kokot\" opcode=" . strtoupper($splitted[0]) . ">\n");
+                echo ("\t\t<arg1 type=\"label\">" . $splitted[1] . "<\arg1>") . "\n";
+                echo ("\t</instruction") . "\n";
+            }
+            else{
+                echo("pooebany kokotJ\n");
+            }
+            break;
 
         case 'PUSHS':
             if (preg_match("/(^GF|^TF|^LF)@[a-zA-Z?!*%#$&_-][a-zA-Z0-9]*/",$splitted[1])){
@@ -262,11 +402,10 @@ while($line=fgets(STDIN))
                 echo ("\t\t<arg1 type=\"symb\">".$splitted[1]."<\arg1>")."\n";
                 echo ("\t</instruction")."\n";
             }
-            elseif (preg_match("/^int@[0-9]{3}/",$splitted[1])){
+            elseif (preg_match("/^int@[0-9]*/",$splitted[1])){
                 echo("\t<instruction order=\"kokot\" opcode=".strtoupper($splitted[0]).">\n");
                 echo ("\t\t<arg1 type=\"symb\">".$splitted[1]."<\arg1>")."\n";
                 echo ("\t</instruction")."\n";
-                break;
             }
             elseif (preg_match("/^nil@^nil/",$splitted[1])){
                 echo("\t<instruction order=\"kokot\" opcode=".strtoupper($splitted[0]).">\n");
