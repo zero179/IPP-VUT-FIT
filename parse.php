@@ -7,31 +7,44 @@ if ($argc > 1) {
 }
     ini_set('display_errors', 'stderr');
     $header = false;
-    $number = -1;
+    $number = 0;
     while ($line = fgets(STDIN)) {
         if (!$header) {
-            if ($line = ".IPPcode21") {
+            if (strtoupper(preg_match("/^(\.IPPcode21)(#.*)|(\s*)/", $line))){
                 $header = true;
+                echo("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
                 echo("<program_language=\"IPPcode21\">\n");
+                continue;
+            }
+            else{
+                echo("pojebany si uz")."\n";
+                exit(21);
             }
         }
+
         if (preg_match("/^$/", $line)){
-            $line=preg_replace("/^$/", "\n", $line);
+            continue;
+            $number--;
+        }
+        if (preg_match("/^\s*#.*/", $line)){
+            //echo($line."\n");
+            //$line=preg_replace("/^\s*#.*/", "\n", $line);
+            //echo($line."\n");
+            continue;
             $number--;
         }
         if (preg_match("/\s*#.*/", $line)){
             $line=preg_replace("/\s*#.*/", "\n", $line);
-            $number--;
-        }
-
-        if (preg_match("/\s*$/", $line)){
-            $line = preg_replace("/\s*$/", "\n", $line);
+            //echo($line."\n");
+            //continue;
+            //$number--;
         }
         $splitted = explode(' ', trim($line, "\n"));
         $argument_1 = explode('@', $splitted[1]);
         $argument_2 = explode ('@',$splitted[2]);
         $argument_3 = explode ('@',$splitted[3]);
         $number++;
+        //echo($splitted[0]."\n");
         switch (strtoupper($splitted[0])) {
             case 'DEFVAR':
             case 'POPS':
@@ -40,13 +53,13 @@ if ($argc > 1) {
             case 'CALL':
             case 'LABEL':
             case 'JUMP':
-                writeLabel($splitted, $argument_1[1]);
+                writeLabel($splitted, $argument_1[1],$number);
                 break;
             case 'PUSHS':
             case 'WRITE':
             case 'EXIT':
             case 'DPRINT':
-                writeSym($splitted, $argument_1[1]);
+                writeSym($splitted, $argument_1[1],$number);
                 break;
             case 'MOVE':
             case 'INT2CHAR':
@@ -84,6 +97,9 @@ if ($argc > 1) {
             case 'BREAK':
                 writeNone($splitted);
                 break;
+            default:
+                echo("asd")."\n";
+                exit(21);
         }
     }
 function writeNone($splitted){
@@ -116,14 +132,14 @@ function writeVar($splitted, $argument_1,$number){
         echo("pojeb sa\n");
     }
 }
-function writeLabel($splitted, $argument_1){
+function writeLabel($splitted, $argument_1,$number){
     $count = count($splitted, COUNT_NORMAL);
     if($count>2){
         echo("kokot si?")."\n";
         exit(0);
     }
     if (preg_match("/[a-zA-Z?!*%#$&_-][a-zA-Z0-9]*/", $splitted[1])){
-        echo("\t<instruction order=\"kokot\" opcode=" . strtoupper($splitted[0]) . ">\n");
+        echo("\t<instruction order=\"$number\" opcode=" . strtoupper($splitted[0]) . ">\n");
         echo ("\t\t<arg1 type=\"label\">" . $argument_1 . "<\arg1>") . "\n";
         echo ("\t</instruction>") . "\n";
     }
@@ -131,34 +147,34 @@ function writeLabel($splitted, $argument_1){
         echo("pojebany kokotJ\n");
     }
 }
-function writeSym($splitted, $argument_1){
+function writeSym($splitted, $argument_1,$number){
     $count = count($splitted, COUNT_NORMAL);
     if($count>2){
         echo("kokot si?")."\n";
         exit(0);
     }
     if (preg_match("/^(GF|TF|LF)@[a-zA-Z?!*%#$&_-][a-zA-Z0-9]*/",$splitted[1])){
-        echo("\t<instruction order=\"kokot\" opcode=".strtoupper($splitted[0]).">\n");
+        echo("\t<instruction order=\"$number\" opcode=".strtoupper($splitted[0]).">\n");
         echo ("\t\t<arg1 type=\"var\">".$argument_1."<\arg1>")."\n";
         echo ("\t</instruction>")."\n";
     }
     elseif (preg_match("/^bool@(true|false)$/",$splitted[1])){
-        echo("\t<instruction order=\"kokot\" opcode=".strtoupper($splitted[0]).">\n");
+        echo("\t<instruction order=\"$number\" opcode=".strtoupper($splitted[0]).">\n");
         echo ("\t\t<arg1 type=\"bool\">".$argument_1."<\arg1>")."\n";
         echo ("\t</instruction>")."\n";
     }
     elseif (preg_match("/^int@[0-9]*/",$splitted[1])){
-        echo("\t<instruction order=\"kokot\" opcode=".strtoupper($splitted[0]).">\n");
+        echo("\t<instruction order=\"$number\" opcode=".strtoupper($splitted[0]).">\n");
         echo ("\t\t<arg1 type=\"int\">".$argument_1."<\arg1>")."\n";
         echo ("\t</instruction>")."\n";
     }
     elseif (preg_match("/^nil@nil$/",$splitted[1])){
-        echo("\t<instruction order=\"kokot\" opcode=".strtoupper($splitted[0]).">\n");
+        echo("\t<instruction order=\"$number\" opcode=".strtoupper($splitted[0]).">\n");
         echo ("\t\t<arg1 type=\"nil\">".$argument_1."<\arg1>")."\n";
         echo ("\t</instruction>")."\n";
     }
     elseif (preg_match("/^string@([\135-\177\041-\042\044-\133]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/",$splitted[1])){
-        echo("\t<instruction order=\"kokot\" opcode=".strtoupper($splitted[0]).">\n");
+        echo("\t<instruction order=\"$number\" opcode=".strtoupper($splitted[0]).">\n");
         echo ("\t\t<arg1 type=\"string\">".$argument_1."<\arg1>")."\n";
         echo ("\t</instruction>")."\n";
     }
