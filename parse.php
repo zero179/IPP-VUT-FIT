@@ -77,7 +77,7 @@ if ($argc > 1) {
             case 'AND':
             case 'OR':
             case 'NOT':
-            case 'STR2INT':
+            case 'STRI2INT':
             case 'CONCAT':
             case 'GETCHAR':
             case 'SETCHAR':
@@ -138,9 +138,9 @@ function writeLabel($splitted, $argument_1,$number){
         echo("kokot si?")."\n";
         exit(0);
     }
-    if (preg_match("/[a-zA-Z?!*%#$&_-][a-zA-Z0-9]*/", $splitted[1])){
+    if (preg_match("/^[a-zA-Z?*!%#$&_-][a-zA-Z0-9]*/", $splitted[1])){
         echo("\t<instruction order=\"$number\" opcode=" . strtoupper($splitted[0]) . ">\n");
-        echo ("\t\t<arg1 type=\"label\">" . $argument_1 . "<\arg1>") . "\n";
+        echo ("\t\t<arg1 type=\"label\">" . $splitted[1] . "<\arg1>") . "\n";
         echo ("\t</instruction>") . "\n";
     }
     else{
@@ -173,7 +173,7 @@ function writeSym($splitted, $argument_1,$number){
         echo ("\t\t<arg1 type=\"nil\">".$argument_1."<\arg1>")."\n";
         echo ("\t</instruction>")."\n";
     }
-    elseif (preg_match("/^string@([\135-\177\041-\042\044-\133]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/",$splitted[1])){
+    elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/",$splitted[1])){
         echo("\t<instruction order=\"$number\" opcode=".strtoupper($splitted[0]).">\n");
         echo ("\t\t<arg1 type=\"string\">".$argument_1."<\arg1>")."\n";
         echo ("\t</instruction>")."\n";
@@ -210,7 +210,7 @@ function writeVarSym($splitted,$argument_1,$argument_2,$number)
             echo ("\t\t<arg1 type=\"var\">".$argument_1."<\arg1>")."\n";
             echo ("\t\t<arg2 type=\"nil\">" . $argument_2 . "<\arg2>") . "\n";
             echo ("\t</instruction>") . "\n";
-        } elseif (preg_match("/^string@([\135-\177\041-\042\044-\133]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[2])) {
+        } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[2])) {
             echo("\t<instruction order=\"$number\" opcode=" . strtoupper($splitted[0]) . ">\n");
             echo ("\t\t<arg1 type=\"var\">".$argument_1."<\arg1>")."\n";
             echo ("\t\t<arg2 type=\"string\">" . $argument_2 . "<\arg2>") . "\n";
@@ -253,7 +253,7 @@ function writeVarSymSym($splitted,$argument_1,$argument_2,$argument_3,$number){
                 echo ("\t\t<arg2 type=\"var\">" . $argument_2 . "<\arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"nil\">" . $argument_3 . "<\arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
-            } elseif (preg_match("/^string@([\135-\177\041-\042\044-\133]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
+            } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper($splitted[0]) . ">\n");
                 echo ("\t\t<arg1 type=\"var\">".$argument_1."<\arg1>")."\n";
                 echo ("\t\t<arg2 type=\"var\">" . $argument_2 . "<\arg2>") . "\n";
@@ -289,7 +289,7 @@ function writeVarSymSym($splitted,$argument_1,$argument_2,$argument_3,$number){
                 echo ("\t\t<arg2 type=\"bool\">" . $argument_2 . "<\arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"nil\">" . $argument_3 . "<\arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
-            } elseif (preg_match("/^string@([\135-\177\041-\042\044-\133]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
+            } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper($splitted[0]) . ">\n");
                 echo ("\t\t<arg1 type=\"var\">".$argument_1."<\arg1>")."\n";
                 echo ("\t\t<arg2 type=\"bool\">" . $argument_2 . "<\arg2>") . "\n";
@@ -325,7 +325,7 @@ function writeVarSymSym($splitted,$argument_1,$argument_2,$argument_3,$number){
                 echo ("\t\t<arg2 type=\"int\">" . $argument_2 . "<\arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"nil\">" . $argument_3 . "<\arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
-            } elseif (preg_match("/^string@([\135-\177\041-\042\044-\133]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
+            } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper($splitted[0]) . ">\n");
                 echo ("\t\t<arg1 type=\"var\">".$argument_1."<\arg1>")."\n";
                 echo ("\t\t<arg2 type=\"int\">" . $argument_2 . "<\arg2>") . "\n";
@@ -361,7 +361,7 @@ function writeVarSymSym($splitted,$argument_1,$argument_2,$argument_3,$number){
                 echo ("\t\t<arg2 type=\"nil\">" . $argument_2 . "<\arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"nil\">" .$argument_3 . "<\arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
-            } elseif (preg_match("/^string@([\135-\177\041-\042\044-\133]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
+            } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper($splitted[0]) . ">\n");
                 echo ("\t\t<arg1 type=\"var\">".$argument_1."<\arg1>")."\n";
                 echo ("\t\t<arg2 type=\"nil\">" . $argument_2 . "<\arg2>") . "\n";
@@ -371,7 +371,7 @@ function writeVarSymSym($splitted,$argument_1,$argument_2,$argument_3,$number){
                 echo("pojebany kokot\n");
             }
         }
-        elseif (preg_match("/^string@([\135-\177\041-\042\044-\133]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[2])) {
+        elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[2])) {
             if (preg_match("/^(GF|TF|LF)@[a-zA-Z?!*%#$&_-][a-zA-Z0-9]*/", $splitted[3])) {
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper($splitted[0]) . ">\n");
                 echo ("\t\t<arg1 type=\"var\">".$argument_1."<\arg1>")."\n";
@@ -397,7 +397,7 @@ function writeVarSymSym($splitted,$argument_1,$argument_2,$argument_3,$number){
                 echo ("\t\t<arg2 type=\"string\">" . $argument_2 . "<\arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"nil\">" . $argument_3 . "<\arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
-            } elseif (preg_match("/^string@([\135-\177\041-\042\044-\133]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
+            } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper($splitted[0]) . ">\n");
                 echo ("\t\t<arg1 type=\"var\">".$argument_1."<\arg1>")."\n";
                 echo ("\t\t<arg2 type=\"string\">" . $argument_2 . "<\arg2>") . "\n";
@@ -423,22 +423,22 @@ function writeVarType($splitted, $argument_1, $argument_2,$number)
         exit(0);
     }
     if (preg_match("/^(GF|TF|LF)@[a-zA-Z?!*%#$&_-][a-zA-Z0-9]*/", $splitted[1])) {
-        if (preg_match("/^int@[0-9]*/", $splitted[2])) {
+        if (preg_match("/^int$/", $splitted[2])) {
             echo("\t<instruction order=\"$number\" opcode=" . strtoupper($splitted[0]) . ">\n");
             echo ("\t\t<arg1 type=\"var\">".$argument_1."<\arg1>")."\n";
-            echo ("\t\t<arg2 type=\"int\">" . $argument_2 . "<\arg2>") . "\n";
+            echo ("\t\t<arg2 type=\"type\">".$splitted[2]."<\arg2>") . "\n";
             echo ("\t</instruction>") . "\n";
         }
-        elseif (preg_match("/^bool@(true|false)$/", $splitted[2])) {
+        elseif (preg_match("/^bool$/", $splitted[2])) {
             echo("\t<instruction order=\"$number\" opcode=" . strtoupper($splitted[0]) . ">\n");
             echo ("\t\t<arg1 type=\"var\">".$argument_1."<\arg1>")."\n";
-            echo ("\t\t<arg2 type=\"bool\">" . $argument_2 . "<\arg2>") . "\n";
+            echo ("\t\t<arg2 type=\"type\">".$splitted[2]."<\arg2>") . "\n";
             echo ("\t</instruction>") . "\n";
         }
-        elseif (preg_match("/^string@([\135-\177\041-\042\044-\133]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[2])) {
+        elseif (preg_match("/^string$/", $splitted[2])) {
             echo("\t<instruction order=\"$number\" opcode=" . strtoupper($splitted[0]) . ">\n");
             echo ("\t\t<arg1 type=\"var\">".$argument_1."<\arg1>")."\n";
-            echo ("\t\t<arg2 type=\"string\">" . $argument_2 . "<\arg2>") . "\n";
+            echo ("\t\t<arg2 type=\"type\">".$splitted[2]."<\arg2>") . "\n";
             echo ("\t</instruction>") . "\n";
         }
         else {
@@ -456,7 +456,7 @@ function writeLabelSymSym($splitted,$argument_1,$argument_2,$argument_3,$number)
         echo("kokot si?")."\n";
         exit(0);
     }
-    if (preg_match("/[a-zA-Z?!*%#$&_-][a-zA-Z0-9]*/", $splitted[1])) {
+    if (preg_match("/^[a-zA-Z?!*%#$&_-][a-zA-Z0-9]*/", $splitted[1])) {
         if (preg_match("/^(GF|TF|LF)@[a-zA-Z?!*%#$&_-][a-zA-Z0-9]*/", $splitted[2])) {
             if (preg_match("/^(GF|TF|LF)@[a-zA-Z?!*%#$&_-][a-zA-Z0-9]*/", $splitted[3])) {
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper($splitted[0]) . ">\n");
@@ -482,7 +482,7 @@ function writeLabelSymSym($splitted,$argument_1,$argument_2,$argument_3,$number)
                 echo ("\t\t<arg2 type=\"var\">" . $argument_2 . "<\arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"nil\">" . $argument_3 . "<\arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
-            } elseif (preg_match("/^string@([\135-\177\041-\042\044-\133]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
+            } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper($splitted[0]) . ">\n");
                 echo ("\t\t<arg1 type=\"label\">" . $argument_1 . "<\arg1>") . "\n";
                 echo ("\t\t<arg2 type=\"var\">" . $argument_2 . "<\arg2>") . "\n";
@@ -516,7 +516,7 @@ function writeLabelSymSym($splitted,$argument_1,$argument_2,$argument_3,$number)
                 echo ("\t\t<arg2 type=\"bool\">" . $argument_2 . "<\arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"nil\">" . $argument_3 . "<\arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
-            } elseif (preg_match("/^string@([\135-\177\041-\042\044-\133]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
+            } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper($splitted[0]) . ">\n");
                 echo ("\t\t<arg1 type=\"label\">" . $argument_1 . "<\arg1>") . "\n";
                 echo ("\t\t<arg2 type=\"bool\">" . $argument_2 . "<\arg2>") . "\n";
@@ -550,7 +550,7 @@ function writeLabelSymSym($splitted,$argument_1,$argument_2,$argument_3,$number)
                 echo ("\t\t<arg2 type=\"int\">" . $argument_2 . "<\arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"nil\">" . $argument_3 . "<\arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
-            } elseif (preg_match("/^string@([\135-\177\041-\042\044-\133]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
+            } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper($splitted[0]) . ">\n");
                 echo ("\t\t<arg1 type=\"label\">" . $argument_1 . "<\arg1>") . "\n";
                 echo ("\t\t<arg2 type=\"int\">" . $argument_2 . "<\arg2>") . "\n";
@@ -584,7 +584,7 @@ function writeLabelSymSym($splitted,$argument_1,$argument_2,$argument_3,$number)
                 echo ("\t\t<arg2 type=\"nil\">" . $argument_2 . "<\arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"nil\">" . $argument_3 . "<\arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
-            } elseif (preg_match("/^string@([\135-\177\041-\042\044-\133]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
+            } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper($splitted[0]) . ">\n");
                 echo ("\t\t<arg1 type=\"label\">" . $argument_1 . "<\arg1>") . "\n";
                 echo ("\t\t<arg2 type=\"nil\">" . $argument_2 . "<\arg2>") . "\n";
@@ -593,7 +593,7 @@ function writeLabelSymSym($splitted,$argument_1,$argument_2,$argument_3,$number)
             } else {
                 echo("pojebany kokot\n");
             }
-        } elseif (preg_match("/^string@([\135-\177\041-\042\044-\133]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[2])) {
+        } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[2])) {
             if (preg_match("/^(GF|TF|LF)@[a-zA-Z?!*%#$&_-][a-zA-Z0-9]*/", $splitted[3])) {
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper($splitted[0]) . ">\n");
                 echo ("\t\t<arg1 type=\"label\">" . $argument_1 . "<\arg1>") . "\n";
@@ -618,7 +618,7 @@ function writeLabelSymSym($splitted,$argument_1,$argument_2,$argument_3,$number)
                 echo ("\t\t<arg2 type=\"string\">" . $argument_2 . "<\arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"nil\">" . $argument_3 . "<\arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
-            } elseif (preg_match("/^string@([\135-\177\041-\042\044-\133]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
+            } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper($splitted[0]) . ">\n");
                 echo ("\t\t<arg1 type=\"label\">" . $argument_1 . "<\arg1>") . "\n";
                 echo ("\t\t<arg2 type=\"string\">" . $argument_2 . "<\arg2>") . "\n";
