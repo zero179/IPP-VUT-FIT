@@ -21,7 +21,6 @@ if ($argc > 1) {
                 exit(21);
             }
         }
-
         if (preg_match("/^$/", $line)){
             continue;
             $number--;
@@ -44,7 +43,6 @@ if ($argc > 1) {
         $argument_2 = explode ('@',$splitted[2]);
         $argument_3 = explode ('@',$splitted[3]);
         $number++;
-        //echo($splitted[0]."\n");
         switch (strtoupper($splitted[0])) {
             case 'DEFVAR':
             case 'POPS':
@@ -460,31 +458,31 @@ function writeLabelSymSym($splitted,$argument_1,$argument_2,$argument_3,$number)
         if (preg_match("/^(GF|TF|LF)@[a-zA-Z?!*%#$&_-][a-zA-Z0-9]*/", $splitted[2])) {
             if (preg_match("/^(GF|TF|LF)@[a-zA-Z?!*%#$&_-][a-zA-Z0-9]*/", $splitted[3])) {
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper($splitted[0]) . ">\n");
-                echo ("\t\t<arg1 type=\"label\">" . $argument_1 . "<\arg1>") . "\n";
+                echo ("\t\t<arg1 type=\"label\">" . $splitted[1] . "<\arg1>") . "\n";
                 echo ("\t\t<arg2 type=\"var\">" . $argument_2 . "<\arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"var\">" . $argument_3 . "<\arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
             } elseif (preg_match("/^bool@(true|false)$/", $splitted[3])) {
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper($splitted[0]) . ">\n");
-                echo ("\t\t<arg1 type=\"label\">" . $argument_1 . "<\arg1>") . "\n";
+                echo ("\t\t<arg1 type=\"label\">" . $splitted[1] . "<\arg1>") . "\n";
                 echo ("\t\t<arg2 type=\"var\">" . $argument_2 . "<\arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"bool\">" . $argument_3 . "<\arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
             } elseif (preg_match("/^int@[0-9]*/", $splitted[3])) {
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper($splitted[0]) . ">\n");
-                echo ("\t\t<arg1 type=\"label\">" . $argument_1 . "<\arg1>") . "\n";
+                echo ("\t\t<arg1 type=\"label\">" . $splitted[1] . "<\arg1>") . "\n";
                 echo ("\t\t<arg2 type=\"var\">" . $argument_2 . "<\arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"int\">" . $argument_3 . "<\arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
             } elseif (preg_match("/^nil@nil$/", $splitted[3])) {
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper($splitted[0]) . ">\n");
-                echo ("\t\t<arg1 type=\"label\">" . $argument_1 . "<\arg1>") . "\n";
+                echo ("\t\t<arg1 type=\"label\">" . $splitted[1] . "<\arg1>") . "\n";
                 echo ("\t\t<arg2 type=\"var\">" . $argument_2 . "<\arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"nil\">" . $argument_3 . "<\arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
             } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper($splitted[0]) . ">\n");
-                echo ("\t\t<arg1 type=\"label\">" . $argument_1 . "<\arg1>") . "\n";
+                echo ("\t\t<arg1 type=\"label\">" . $splitted[1] . "<\arg1>") . "\n";
                 echo ("\t\t<arg2 type=\"var\">" . $argument_2 . "<\arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"string\">" . $argument_3 . "<\arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
