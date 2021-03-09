@@ -17,7 +17,6 @@ if ($argc > 1) {
                 continue;
             }
             else{
-                echo("pojebany si uz")."\n";
                 exit(21);
             }
         }
@@ -26,22 +25,16 @@ if ($argc > 1) {
             $number--;
         }
         if (preg_match("/^\s*#.*/", $line)){
-            //echo($line."\n");
-            //$line=preg_replace("/^\s*#.*/", "\n", $line);
-            //echo($line."\n");
             continue;
             $number--;
         }
         if (preg_match("/\s*#.*/", $line)){
             $line=preg_replace("/\s*#.*/", "\n", $line);
-            //echo($line."\n");
-            //continue;
-            //$number--;
         }
         $splitted = explode(' ', trim($line, "\n"));
-        $argument_1 = explode('@', $splitted[1]);
-        $argument_2 = explode ('@',$splitted[2]);
-        $argument_3 = explode ('@',$splitted[3]);
+        $argument_1 = explode('@', $splitted[1], 2);
+        $argument_2 = explode ('@',$splitted[2], 2);
+        $argument_3 = explode ('@',$splitted[3], 2);
         $number++;
         switch (strtoupper($splitted[0])) {
             case 'DEFVAR':
@@ -93,49 +86,44 @@ if ($argc > 1) {
             case 'POPFRAME':
             case 'RETURN':
             case 'BREAK':
-                writeNone($splitted);
+                writeNone($splitted,$number);
                 break;
             default:
-                echo("asd")."\n";
-                exit(21);
+                exit(22);
         }
     }
-function writeNone($splitted){
+function writeNone($splitted,$number){
     $count = count($splitted, COUNT_NORMAL);
     if($count>1){
-        echo("kokot si?")."\n";
-        exit(0);
+        exit(23);
     }
     if (preg_match("/[\r\n]*$/", $splitted[1])){
-        echo("\t<instruction opcode=\"".$splitted[0]."\">")."\n";
+        echo("\t<instruction order=\"$number\" opcode=".strtoupper($splitted[0]).">\n");
         echo("\t</instruction>")."\n";
     }
     else{
-        echo("kokoot\n");
+        exit(23);
     }
 }
 function writeVar($splitted, $argument_1,$number){
     $count = count($splitted, COUNT_NORMAL);
     if($count>2){
-        echo("kokot si?")."\n";
-        exit(0);
+        exit(23);
     }
     if(preg_match("/^(GF|TF|LF)@[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[1]))
     {
-        echo("AHOJ\n");
         echo("\t<instruction order=\"$number\" opcode=".strtoupper($splitted[0]).">\n");
         echo("\t\t<arg1 type=\"var\">".$argument_1."<\arg1>")."\n";
         echo("\t</instruction>")."\n";
     }
     else{
-        echo("pojeb sa\n");
+        exit(23);
     }
 }
 function writeLabel($splitted, $argument_1,$number){
     $count = count($splitted, COUNT_NORMAL);
     if($count>2){
-        echo("kokot si?")."\n";
-        exit(0);
+        exit(23);
     }
     if (preg_match("/^[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[1])){
         echo("\t<instruction order=\"$number\" opcode=" . strtoupper($splitted[0]) . ">\n");
@@ -143,14 +131,13 @@ function writeLabel($splitted, $argument_1,$number){
         echo ("\t</instruction>") . "\n";
     }
     else{
-        echo("pojebany kokotJ\n");
+        exit(23);
     }
 }
 function writeSym($splitted, $argument_1,$number){
     $count = count($splitted, COUNT_NORMAL);
     if($count>2){
-        echo("kokot si?")."\n";
-        exit(0);
+        exit(23);
     }
     if (preg_match("/^(GF|TF|LF)@[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/",$splitted[1])){
         echo("\t<instruction order=\"$number\" opcode=".strtoupper($splitted[0]).">\n");
@@ -178,15 +165,14 @@ function writeSym($splitted, $argument_1,$number){
         echo ("\t</instruction>")."\n";
     }
     else{
-        echo("pojebany kokot\n");
+        exit(23);
     }
 }
 function writeVarSym($splitted,$argument_1,$argument_2,$number)
 {
     $count = count($splitted, COUNT_NORMAL);
     if($count>3){
-        echo("kokot si?")."\n";
-        exit(0);
+        exit(23);
     }
     elseif (preg_match("/^(GF|TF|LF)@[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[1])) {
         if (preg_match("/^(GF|TF|LF)@[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[2])) {
@@ -215,15 +201,14 @@ function writeVarSym($splitted,$argument_1,$argument_2,$number)
             echo ("\t\t<arg2 type=\"string\">" . $argument_2 . "<\arg2>") . "\n";
             echo ("\t</instruction>") . "\n";
         } else {
-            echo("pojebany kokot\n");
+            exit(23);
         }
     }
 }
 function writeVarSymSym($splitted,$argument_1,$argument_2,$argument_3,$number){
     $count = count($splitted, COUNT_NORMAL);
     if($count>4){
-        echo("kokot si?")."\n";
-        exit(0);
+        exit(23);
     }
     if (preg_match("/^(GF|TF|LF)@[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[1])) {
         if (preg_match("/^(GF|TF|LF)@[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[2])) {
@@ -259,7 +244,7 @@ function writeVarSymSym($splitted,$argument_1,$argument_2,$argument_3,$number){
                 echo ("\t\t<arg3 type=\"string\">" . $argument_3 . "<\arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
             } else {
-                echo("pojebany kokot\n");
+                exit(23);
             }
         }
         elseif (preg_match("/^bool@(true|false)$/", $splitted[2])) {
@@ -295,7 +280,7 @@ function writeVarSymSym($splitted,$argument_1,$argument_2,$argument_3,$number){
                 echo ("\t\t<arg3 type=\"string\">" . $argument_3 . "<\arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
             } else {
-                echo("pojebany kokot\n");
+                exit(23);
             }
         }
         elseif (preg_match("/^int@[0-9]*/", $splitted[2])) {
@@ -331,7 +316,7 @@ function writeVarSymSym($splitted,$argument_1,$argument_2,$argument_3,$number){
                 echo ("\t\t<arg3 type=\"string\">" . $argument_3 . "<\arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
             } else {
-                echo("pojebany kokot\n");
+                exit(23);
             }
         }
         elseif (preg_match("/^nil@nil$/", $splitted[2])) {
@@ -367,7 +352,7 @@ function writeVarSymSym($splitted,$argument_1,$argument_2,$argument_3,$number){
                 echo ("\t\t<arg3 type=\"string\">" . $argument_3 . "<\arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
             } else {
-                echo("pojebany kokot\n");
+                exit(23);
             }
         }
         elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[2])) {
@@ -403,23 +388,22 @@ function writeVarSymSym($splitted,$argument_1,$argument_2,$argument_3,$number){
                 echo ("\t\t<arg3 type=\"string\">" . $argument_3 . "<\arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
             } else {
-                echo("pojebany kokot\n");
+                exit(23);
             }
         }
         else {
-            echo("pojebany kokot\n");
+            exit(23);
         }
     }
     else{
-        echo("pojebany kokot\n");
+        exit(23);
     }
 }
 function writeVarType($splitted, $argument_1, $argument_2,$number)
 {
     $count = count($splitted, COUNT_NORMAL);
     if($count>3){
-        echo("kokot si?")."\n";
-        exit(0);
+        exit(23);
     }
     if (preg_match("/^(GF|TF|LF)@[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[1])) {
         if (preg_match("/^int$/", $splitted[2])) {
@@ -441,19 +425,18 @@ function writeVarType($splitted, $argument_1, $argument_2,$number)
             echo ("\t</instruction>") . "\n";
         }
         else {
-            echo("pojebany kokot\n");
+            exit(23);
         }
     }
     else {
-        echo("pojebany kokot\n");
+        exit(23);
     }
 }
 function writeLabelSymSym($splitted,$argument_1,$argument_2,$argument_3,$number)
 {
     $count = count($splitted, COUNT_NORMAL);
     if($count>4){
-        echo("kokot si?")."\n";
-        exit(0);
+        exit(23);
     }
     if (preg_match("/^[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[1])) {
         if (preg_match("/^(GF|TF|LF)@[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[2])) {
@@ -488,7 +471,7 @@ function writeLabelSymSym($splitted,$argument_1,$argument_2,$argument_3,$number)
                 echo ("\t\t<arg3 type=\"string\">" . $argument_3 . "<\arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
             } else {
-                echo("pojebany kokot\n");
+                exit(23);
             }
         } elseif (preg_match("/^bool@(true|false)$/", $splitted[2])) {
             if (preg_match("/^(GF|TF|LF)@[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[3])) {
@@ -522,7 +505,7 @@ function writeLabelSymSym($splitted,$argument_1,$argument_2,$argument_3,$number)
                 echo ("\t\t<arg3 type=\"string\">" . $argument_3 . "<\arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
             } else {
-                echo("pojebany kokot\n");
+                exit(23);
             }
         } elseif (preg_match("/^int@[0-9]*/", $splitted[2])) {
             if (preg_match("/^(GF|TF|LF)@[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[3])) {
@@ -556,7 +539,7 @@ function writeLabelSymSym($splitted,$argument_1,$argument_2,$argument_3,$number)
                 echo ("\t\t<arg3 type=\"string\">" . $argument_3 . "<\arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
             } else {
-                echo("pojebany kokot\n");
+                exit(23);
             }
         } elseif (preg_match("/^nil@nil$/", $splitted[2])) {
             if (preg_match("/^(GF|TF|LF)@[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[3])) {
@@ -590,7 +573,7 @@ function writeLabelSymSym($splitted,$argument_1,$argument_2,$argument_3,$number)
                 echo ("\t\t<arg3 type=\"string\">" . $argument_3 . "<\arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
             } else {
-                echo("pojebany kokot\n");
+                exit(23);
             }
         } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[2])) {
             if (preg_match("/^(GF|TF|LF)@[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[3])) {
@@ -624,12 +607,12 @@ function writeLabelSymSym($splitted,$argument_1,$argument_2,$argument_3,$number)
                 echo ("\t\t<arg3 type=\"string\">" . $argument_3 . "<\arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
             } else {
-                echo("pojebany kokot\n");
+                exit(23);
             }
         } else {
-            echo("pojebany kokot\n");
+            exit(23);
         }
     } else {
-        echo("pojebany kokot\n");
+        exit(23);
     }
 }
