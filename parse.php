@@ -9,8 +9,30 @@ if ($argc > 1) {
     $header = false;
     $number = 0;
     while ($line = fgets(STDIN)) {
+        if (preg_match("/^\s*/",$line)){
+            $line=preg_replace("/^\s*/", "", $line);
+        }
+        if (preg_match("/\s*$/",$line)){
+            $line=preg_replace("/\s*$/", "", $line);
+        }
+        if (preg_match("/^\s*$/", $line)){
+            $line=preg_replace("/^\s*$/", "\n", $line);
+        }
+        if (preg_match( "/\s{2,}/", $line)){
+            $line=preg_replace("/\s{2,}/", " ", $line);
+        }
+        if (preg_match("/^\s*#.*/", $line)){
+            continue;
+            $number--;
+        }
+        if (preg_match("/\s*#.*/", $line)){
+            $line=preg_replace("/\s*#.*/", "", $line);
+        }
+        if ($line == "\n"){
+            continue;
+        }
         if (!$header) {
-            if (strtoupper(preg_match("/^(\.IPPcode21)(#.*)|(\s*)/", $line))){
+            if(preg_match("/^\s*(\.IPPCODE21)\s*$/", (strtoupper($line)))){
                 $header = true;
                 echo("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
                 echo("<program language=\"IPPcode21\">\n");
@@ -19,17 +41,6 @@ if ($argc > 1) {
             else{
                 exit(21);
             }
-        }
-        if (preg_match("/^$/", $line)){
-            continue;
-            $number--;
-        }
-        if (preg_match("/^\s*#.*/", $line)){
-            continue;
-            $number--;
-        }
-        if (preg_match("/\s*#.*/", $line)){
-            $line=preg_replace("/\s*#.*/", "\n", $line);
         }
         $splitted = explode(' ', trim($line, "\n"));
         $argument_1 = explode('@', $splitted[1], 2);
@@ -88,6 +99,8 @@ if ($argc > 1) {
             case 'BREAK':
                 writeNone($splitted,$number);
                 break;
+            case 'NULL':
+                break;
             default:
                 exit(22);
         }
@@ -112,6 +125,7 @@ function writeVar($splitted, $argument_1,$number){
     }
     if(preg_match("/^(GF|TF|LF)@[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[1]))
     {
+        $splitted[1]= preg_replace("/&/", "&amp;", $splitted[1]);
         echo("\t<instruction order=\"$number\" opcode=".strtoupper("\"$splitted[0]\"").">\n");
         echo("\t\t<arg1 type=\"var\">".$splitted[1]."</arg1>")."\n";
         echo("\t</instruction>")."\n";
@@ -140,6 +154,7 @@ function writeSym($splitted, $argument_1,$number){
         exit(23);
     }
     if (preg_match("/^(GF|TF|LF)@[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/",$splitted[1])){
+        $splitted[1]= preg_replace("/&/", "&amp;", $splitted[1]);
         echo("\t<instruction order=\"$number\" opcode=".strtoupper("\"$splitted[0]\"").">\n");
         echo ("\t\t<arg1 type=\"var\">".$splitted[1]."</arg1>")."\n";
         echo ("\t</instruction>")."\n";
@@ -149,7 +164,7 @@ function writeSym($splitted, $argument_1,$number){
         echo ("\t\t<arg1 type=\"bool\">".$argument_1."</arg1>")."\n";
         echo ("\t</instruction>")."\n";
     }
-    elseif (preg_match("/^int@[0-9]*/",$splitted[1])){
+    elseif (preg_match("/^int@\+{0,1}\-{0,1}[0-9]+/",$splitted[1])){
         echo("\t<instruction order=\"$number\" opcode=".strtoupper("\"$splitted[0]\"").">\n");
         echo ("\t\t<arg1 type=\"int\">".$argument_1."</arg1>")."\n";
         echo ("\t</instruction>")."\n";
@@ -159,7 +174,13 @@ function writeSym($splitted, $argument_1,$number){
         echo ("\t\t<arg1 type=\"nil\">".$argument_1."</arg1>")."\n";
         echo ("\t</instruction>")."\n";
     }
-    elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/",$splitted[1])){
+    elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=([0-9][0-9][0-9]))))*$/",$splitted[1])){
+
+        $argument_1= preg_replace("/&/", "&amp;", $argument_1);
+        $argument_1= preg_replace("/\"/", "&quot;", $argument_1);
+        $argument_1= preg_replace("/'/", "&apos;", $argument_1);
+        $argument_1= preg_replace("/>/", "&gt;", $argument_1);
+        $argument_1= preg_replace("/</", "&lt;", $argument_1);
         echo("\t<instruction order=\"$number\" opcode=".strtoupper("\"$splitted[0]\"").">\n");
         echo ("\t\t<arg1 type=\"string\">".$argument_1."</arg1>")."\n";
         echo ("\t</instruction>")."\n";
@@ -175,7 +196,9 @@ function writeVarSym($splitted,$argument_1,$argument_2,$number)
         exit(23);
     }
     if (preg_match("/^(GF|TF|LF)@[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[1])) {
+        $splitted[1]= preg_replace("/&/", "&amp;", $splitted[1]);
         if (preg_match("/^(GF|TF|LF)@[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[2])) {
+            $splitted[2]= preg_replace("/&/", "&amp;", $splitted[2]);
             echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
             echo ("\t\t<arg1 type=\"var\">".$splitted[1]."</arg1>")."\n";
             echo ("\t\t<arg2 type=\"var\">" . $splitted[2] . "</arg2>") . "\n";
@@ -185,7 +208,7 @@ function writeVarSym($splitted,$argument_1,$argument_2,$number)
             echo ("\t\t<arg1 type=\"var\">".$splitted[1]."</arg1>")."\n";
             echo ("\t\t<arg2 type=\"bool\">" . $argument_2 . "</arg2>") . "\n";
             echo ("\t</instruction>") . "\n";
-        } elseif (preg_match("/^int@[0-9]*/", $splitted[2])) {
+        } elseif (preg_match("/^int@\+{0,1}\-{0,1}[0-9]+/", $splitted[2])) {
             echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
             echo ("\t\t<arg1 type=\"var\">".$splitted[1]."</arg1>")."\n";
             echo ("\t\t<arg2 type=\"int\">" . $argument_2 . "</arg2>") . "\n";
@@ -195,7 +218,12 @@ function writeVarSym($splitted,$argument_1,$argument_2,$number)
             echo ("\t\t<arg1 type=\"var\">".$splitted[1]."</arg1>")."\n";
             echo ("\t\t<arg2 type=\"nil\">" . $argument_2 . "</arg2>") . "\n";
             echo ("\t</instruction>") . "\n";
-        } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[2])) {
+        } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=([0-9][0-9][0-9]))))*$/", $splitted[2])) {
+            $argument_2= preg_replace("/&/", "&amp;", $argument_2);
+            $argument_2= preg_replace("/\"/", "&quot;", $argument_2);
+            $argument_2= preg_replace("/'/", "&apos;", $argument_2);
+            $argument_2= preg_replace("/>/", "&gt;", $argument_2);
+            $argument_2= preg_replace("/</", "&lt;", $argument_2);
             echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
             echo ("\t\t<arg1 type=\"var\">".$splitted[1]."</arg1>")."\n";
             echo ("\t\t<arg2 type=\"string\">" . $argument_2 . "</arg2>") . "\n";
@@ -214,8 +242,11 @@ function writeVarSymSym($splitted,$argument_1,$argument_2,$argument_3,$number){
         exit(23);
     }
     if (preg_match("/^(GF|TF|LF)@[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[1])) {
+        $splitted[1]= preg_replace("/&/", "&amp;", $splitted[1]);
         if (preg_match("/^(GF|TF|LF)@[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[2])) {
+            $splitted[2]= preg_replace("/&/", "&amp;", $splitted[2]);
             if (preg_match("/^(GF|TF|LF)@[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[3])) {
+                $splitted[3]= preg_replace("/&/", "&amp;", $splitted[3]);
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
                 echo ("\t\t<arg1 type=\"var\">".$splitted[1]."</arg1>")."\n";
                 echo ("\t\t<arg2 type=\"var\">" . $splitted[2] . "</arg2>") . "\n";
@@ -228,7 +259,7 @@ function writeVarSymSym($splitted,$argument_1,$argument_2,$argument_3,$number){
                 echo ("\t\t<arg2 type=\"var\">" . $splitted[2] . "</arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"bool\">" . $argument_3 . "</arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
-            } elseif (preg_match("/^int@[0-9]*/", $splitted[3])) {
+            } elseif (preg_match("/^int@\+{0,1}\-{0,1}[0-9]+/", $splitted[3])) {
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
                 echo ("\t\t<arg1 type=\"var\">".$splitted[1]."</arg1>")."\n";
                 echo ("\t\t<arg2 type=\"var\">" . $splitted[2] . "</arg2>") . "\n";
@@ -240,7 +271,12 @@ function writeVarSymSym($splitted,$argument_1,$argument_2,$argument_3,$number){
                 echo ("\t\t<arg2 type=\"var\">" . $splitted[2] . "</arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"nil\">" . $argument_3 . "</arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
-            } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
+            } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=([0-9][0-9][0-9]))))*$/", $splitted[3])) {
+                $argument_3= preg_replace("/&/", "&amp;", $argument_3);
+                $argument_3= preg_replace("/\"/", "&quot;", $argument_3);
+                $argument_3= preg_replace("/'/", "&apos;", $argument_3);
+                $argument_3= preg_replace("/>/", "&gt;", $argument_3);
+                $argument_3= preg_replace("/</", "&lt;", $argument_3);
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
                 echo ("\t\t<arg1 type=\"var\">".$splitted[1]."</arg1>")."\n";
                 echo ("\t\t<arg2 type=\"var\">" . $splitted[2] . "</arg2>") . "\n";
@@ -252,6 +288,7 @@ function writeVarSymSym($splitted,$argument_1,$argument_2,$argument_3,$number){
         }
         elseif (preg_match("/^bool@(true|false)$/", $splitted[2])) {
             if (preg_match("/^(GF|TF|LF)@[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[3])) {
+                $splitted[3]= preg_replace("/&/", "&amp;", $splitted[3]);
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
                 echo ("\t\t<arg1 type=\"var\">".$splitted[1]."</arg1>")."\n";
                 echo ("\t\t<arg2 type=\"bool\">" . $argument_2 . "</arg2>") . "\n";
@@ -264,7 +301,7 @@ function writeVarSymSym($splitted,$argument_1,$argument_2,$argument_3,$number){
                 echo ("\t\t<arg2 type=\"bool\">" . $argument_2 . "</arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"bool\">" . $argument_3 . "</arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
-            } elseif (preg_match("/^int@[0-9]*/", $splitted[3])) {
+            } elseif (preg_match("/^int@\+{0,1}\-{0,1}[0-9]+/", $splitted[3])) {
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
                 echo ("\t\t<arg1 type=\"var\">".$splitted[1]."</arg1>")."\n";
                 echo ("\t\t<arg2 type=\"bool\">" . $argument_2 . "</arg2>") . "\n";
@@ -276,7 +313,12 @@ function writeVarSymSym($splitted,$argument_1,$argument_2,$argument_3,$number){
                 echo ("\t\t<arg2 type=\"bool\">" . $argument_2 . "</arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"nil\">" . $argument_3 . "</arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
-            } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
+            } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=([0-9][0-9][0-9]))))*$/", $splitted[3])) {
+                $argument_3= preg_replace("/&/", "&amp;", $argument_3);
+                $argument_3= preg_replace("/\"/", "&quot;", $argument_3);
+                $argument_3= preg_replace("/'/", "&apos;", $argument_3);
+                $argument_3= preg_replace("/>/", "&gt;", $argument_3);
+                $argument_3= preg_replace("/</", "&lt;", $argument_3);
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
                 echo ("\t\t<arg1 type=\"var\">".$splitted[1]."</arg1>")."\n";
                 echo ("\t\t<arg2 type=\"bool\">" . $argument_2 . "</arg2>") . "\n";
@@ -286,8 +328,9 @@ function writeVarSymSym($splitted,$argument_1,$argument_2,$argument_3,$number){
                 exit(23);
             }
         }
-        elseif (preg_match("/^int@[0-9]*/", $splitted[2])) {
+        elseif (preg_match("/^int@\+{0,1}\-{0,1}[0-9]+/", $splitted[2])) {
             if (preg_match("/^(GF|TF|LF)@[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[3])) {
+                $splitted[3]= preg_replace("/&/", "&amp;", $splitted[3]);
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
                 echo ("\t\t<arg1 type=\"var\">".$splitted[1]."</arg1>")."\n";
                 echo ("\t\t<arg2 type=\"int\">" . $argument_2 . "</arg2>") . "\n";
@@ -300,7 +343,7 @@ function writeVarSymSym($splitted,$argument_1,$argument_2,$argument_3,$number){
                 echo ("\t\t<arg2 type=\"int\">" . $argument_2 . "</arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"bool\">" . $argument_3 . "</arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
-            } elseif (preg_match("/^int@[0-9]*/", $splitted[3])) {
+            } elseif (preg_match("/^int@\+{0,1}\-{0,1}[0-9]+/", $splitted[3])) {
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
                 echo ("\t\t<arg1 type=\"var\">".$splitted[1]."</arg1>")."\n";
                 echo ("\t\t<arg2 type=\"int\">" . $argument_2 . "</arg2>") . "\n";
@@ -312,7 +355,12 @@ function writeVarSymSym($splitted,$argument_1,$argument_2,$argument_3,$number){
                 echo ("\t\t<arg2 type=\"int\">" . $argument_2 . "</arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"nil\">" . $argument_3 . "</arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
-            } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
+            } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=([0-9][0-9][0-9]))))*$/", $splitted[3])) {
+                $argument_3= preg_replace("/&/", "&amp;", $argument_3);
+                $argument_3= preg_replace("/\"/", "&quot;", $argument_3);
+                $argument_3= preg_replace("/'/", "&apos;", $argument_3);
+                $argument_3= preg_replace("/>/", "&gt;", $argument_3);
+                $argument_3= preg_replace("/</", "&lt;", $argument_3);
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
                 echo ("\t\t<arg1 type=\"var\">".$splitted[1]."</arg1>")."\n";
                 echo ("\t\t<arg2 type=\"int\">" . $argument_2 . "</arg2>") . "\n";
@@ -324,6 +372,7 @@ function writeVarSymSym($splitted,$argument_1,$argument_2,$argument_3,$number){
         }
         elseif (preg_match("/^nil@nil$/", $splitted[2])) {
             if (preg_match("/^(GF|TF|LF)@[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[3])) {
+                $splitted[3]= preg_replace("/&/", "&amp;", $splitted[3]);
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
                 echo ("\t\t<arg1 type=\"var\">".$splitted[1]."</arg1>")."\n";
                 echo ("\t\t<arg2 type=\"nil\">" . $argument_2 . "</arg2>") . "\n";
@@ -336,7 +385,7 @@ function writeVarSymSym($splitted,$argument_1,$argument_2,$argument_3,$number){
                 echo ("\t\t<arg2 type=\"nil\">" . $argument_2 . "</arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"bool\">" . $argument_3 . "</arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
-            } elseif (preg_match("/^int@[0-9]*/", $splitted[3])) {
+            } elseif (preg_match("/^int@\+{0,1}\-{0,1}[0-9]+/", $splitted[3])) {
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
                 echo ("\t\t<arg1 type=\"var\">".$splitted[1]."</arg1>")."\n";
                 echo ("\t\t<arg2 type=\"nil\">" . $argument_2 . "</arg2>") . "\n";
@@ -348,7 +397,12 @@ function writeVarSymSym($splitted,$argument_1,$argument_2,$argument_3,$number){
                 echo ("\t\t<arg2 type=\"nil\">" . $argument_2 . "</arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"nil\">" .$argument_3 . "</arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
-            } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
+            } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=([0-9][0-9][0-9]))))*$/", $splitted[3])) {
+                $argument_3= preg_replace("/&/", "&amp;", $argument_3);
+                $argument_3= preg_replace("/\"/", "&quot;", $argument_3);
+                $argument_3= preg_replace("/'/", "&apos;", $argument_3);
+                $argument_3= preg_replace("/>/", "&gt;", $argument_3);
+                $argument_3= preg_replace("/</", "&lt;", $argument_3);
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
                 echo ("\t\t<arg1 type=\"var\">".$splitted[1]."</arg1>")."\n";
                 echo ("\t\t<arg2 type=\"nil\">" . $argument_2 . "</arg2>") . "\n";
@@ -358,8 +412,14 @@ function writeVarSymSym($splitted,$argument_1,$argument_2,$argument_3,$number){
                 exit(23);
             }
         }
-        elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[2])) {
+        elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=([0-9][0-9][0-9]))))*$/", $splitted[2])) {
+            $argument_2= preg_replace("/&/", "&amp;", $argument_2);
+            $argument_2= preg_replace("/\"/", "&quot;", $argument_2);
+            $argument_2= preg_replace("/'/", "&apos;", $argument_2);
+            $argument_2= preg_replace("/>/", "&gt;", $argument_2);
+            $argument_2= preg_replace("/</", "&lt;", $argument_2);
             if (preg_match("/^(GF|TF|LF)@[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[3])) {
+                $splitted[3]= preg_replace("/&/", "&amp;", $splitted[3]);
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
                 echo ("\t\t<arg1 type=\"var\">".$splitted[1]."</arg1>")."\n";
                 echo ("\t\t<arg2 type=\"string\">" . $argument_2 . "</arg2>") . "\n";
@@ -372,7 +432,7 @@ function writeVarSymSym($splitted,$argument_1,$argument_2,$argument_3,$number){
                 echo ("\t\t<arg2 type=\"string\">" . $argument_2 . "</arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"bool\">" . $argument_3 . "</arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
-            } elseif (preg_match("/^int@[0-9]*/", $splitted[3])) {
+            } elseif (preg_match("/^int@\+{0,1}\-{0,1}[0-9]+/", $splitted[3])) {
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
                 echo ("\t\t<arg1 type=\"var\">".$splitted[1]."</arg1>")."\n";
                 echo ("\t\t<arg2 type=\"string\">" . $argument_2 . "</arg2>") . "\n";
@@ -384,7 +444,12 @@ function writeVarSymSym($splitted,$argument_1,$argument_2,$argument_3,$number){
                 echo ("\t\t<arg2 type=\"string\">" . $argument_2 . "</arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"nil\">" . $argument_3 . "</arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
-            } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
+            } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=([0-9][0-9][0-9]))))*$/", $splitted[3])) {
+                $argument_3= preg_replace("/&/", "&amp;", $argument_3);
+                $argument_3= preg_replace("/\"/", "&quot;", $argument_3);
+                $argument_3= preg_replace("/'/", "&apos;", $argument_3);
+                $argument_3= preg_replace("/>/", "&gt;", $argument_3);
+                $argument_3= preg_replace("/</", "&lt;", $argument_3);
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
                 echo ("\t\t<arg1 type=\"var\">".$splitted[1]."</arg1>")."\n";
                 echo ("\t\t<arg2 type=\"string\">" . $argument_2 . "</arg2>") . "\n";
@@ -409,6 +474,7 @@ function writeVarType($splitted, $argument_1, $argument_2,$number)
         exit(23);
     }
     if (preg_match("/^(GF|TF|LF)@[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[1])) {
+        $splitted[1]= preg_replace("/&/", "&amp;", $splitted[1]);
         if (preg_match("/^int$/", $splitted[2])) {
             echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
             echo ("\t\t<arg1 type=\"var\">".$splitted[1]."</arg1>")."\n";
@@ -443,7 +509,9 @@ function writeLabelSymSym($splitted,$argument_1,$argument_2,$argument_3,$number)
     }
     if (preg_match("/^[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[1])) {
         if (preg_match("/^(GF|TF|LF)@[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[2])) {
+            $splitted[2]= preg_replace("/&/", "&amp;", $splitted[2]);
             if (preg_match("/^(GF|TF|LF)@[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[3])) {
+                $splitted[3]= preg_replace("/&/", "&amp;", $splitted[3]);
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
                 echo ("\t\t<arg1 type=\"label\">" . $splitted[1] . "</arg1>") . "\n";
                 echo ("\t\t<arg2 type=\"var\">" . $splitted[2] . "</arg2>") . "\n";
@@ -455,7 +523,7 @@ function writeLabelSymSym($splitted,$argument_1,$argument_2,$argument_3,$number)
                 echo ("\t\t<arg2 type=\"var\">" . $splitted[2] . "</arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"bool\">" . $argument_3 . "</arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
-            } elseif (preg_match("/^int@[0-9]*/", $splitted[3])) {
+            } elseif (preg_match("/^int@\+{0,1}\-{0,1}[0-9]+/", $splitted[3])) {
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
                 echo ("\t\t<arg1 type=\"label\">" . $splitted[1] . "</arg1>") . "\n";
                 echo ("\t\t<arg2 type=\"var\">" . $splitted[2] . "</arg2>") . "\n";
@@ -467,7 +535,12 @@ function writeLabelSymSym($splitted,$argument_1,$argument_2,$argument_3,$number)
                 echo ("\t\t<arg2 type=\"var\">" . $splitted[2] . "</arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"nil\">" . $argument_3 . "</arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
-            } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
+            } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=([0-9][0-9][0-9]))))*$/", $splitted[3])) {
+                $argument_3= preg_replace("/&/", "&amp;", $argument_3);
+                $argument_3= preg_replace("/\"/", "&quot;", $argument_3);
+                $argument_3= preg_replace("/'/", "&apos;", $argument_3);
+                $argument_3= preg_replace("/>/", "&gt;", $argument_3);
+                $argument_3= preg_replace("/</", "&lt;", $argument_3);
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
                 echo ("\t\t<arg1 type=\"label\">" . $splitted[1] . "</arg1>") . "\n";
                 echo ("\t\t<arg2 type=\"var\">" . $splitted[2] . "</arg2>") . "\n";
@@ -478,6 +551,7 @@ function writeLabelSymSym($splitted,$argument_1,$argument_2,$argument_3,$number)
             }
         } elseif (preg_match("/^bool@(true|false)$/", $splitted[2])) {
             if (preg_match("/^(GF|TF|LF)@[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[3])) {
+                $splitted[3]= preg_replace("/&/", "&amp;", $splitted[3]);
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
                 echo ("\t\t<arg1 type=\"label\">" . $splitted[1] . "</arg1>") . "\n";
                 echo ("\t\t<arg2 type=\"bool\">" . $argument_2 . "</arg2>") . "\n";
@@ -489,7 +563,7 @@ function writeLabelSymSym($splitted,$argument_1,$argument_2,$argument_3,$number)
                 echo ("\t\t<arg2 type=\"bool\">" . $argument_2 . "</arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"bool\">" . $argument_3 . "</arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
-            } elseif (preg_match("/^int@[0-9]*/", $splitted[3])) {
+            } elseif (preg_match("/^int@\+{0,1}\-{0,1}[0-9]+/", $splitted[3])) {
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
                 echo ("\t\t<arg1 type=\"label\">" . $splitted[1] . "</arg1>") . "\n";
                 echo ("\t\t<arg2 type=\"bool\">" . $argument_2 . "</arg2>") . "\n";
@@ -501,7 +575,12 @@ function writeLabelSymSym($splitted,$argument_1,$argument_2,$argument_3,$number)
                 echo ("\t\t<arg2 type=\"bool\">" . $argument_2 . "</arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"nil\">" . $argument_3 . "</arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
-            } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
+            } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=([0-9][0-9][0-9]))))*$/", $splitted[3])) {
+                $argument_3= preg_replace("/&/", "&amp;", $argument_3);
+                $argument_3= preg_replace("/\"/", "&quot;", $argument_3);
+                $argument_3= preg_replace("/'/", "&apos;", $argument_3);
+                $argument_3= preg_replace("/>/", "&gt;", $argument_3);
+                $argument_3= preg_replace("/</", "&lt;", $argument_3);
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
                 echo ("\t\t<arg1 type=\"label\">" . $splitted[1] . "</arg1>") . "\n";
                 echo ("\t\t<arg2 type=\"bool\">" . $argument_2 . "</arg2>") . "\n";
@@ -510,8 +589,9 @@ function writeLabelSymSym($splitted,$argument_1,$argument_2,$argument_3,$number)
             } else {
                 exit(23);
             }
-        } elseif (preg_match("/^int@[0-9]*/", $splitted[2])) {
+        } elseif (preg_match("/^int@\+{0,1}\-{0,1}[0-9]+/", $splitted[2])) {
             if (preg_match("/^(GF|TF|LF)@[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[3])) {
+                $splitted[3]= preg_replace("/&/", "&amp;", $splitted[3]);
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
                 echo ("\t\t<arg1 type=\"label\">" . $splitted[1] . "</arg1>") . "\n";
                 echo ("\t\t<arg2 type=\"int\">" . $argument_2 . "</arg2>") . "\n";
@@ -523,7 +603,7 @@ function writeLabelSymSym($splitted,$argument_1,$argument_2,$argument_3,$number)
                 echo ("\t\t<arg2 type=\"int\">" . $argument_2. "</arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"bool\">" . $argument_3 . "</arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
-            } elseif (preg_match("/^int@[0-9]*/", $splitted[3])) {
+            } elseif (preg_match("/^int@[0-9]+/", $splitted[3])) {
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
                 echo ("\t\t<arg1 type=\"label\">" . $splitted[1] . "</arg1>") . "\n";
                 echo ("\t\t<arg2 type=\"int\">" . $argument_2 . "</arg2>") . "\n";
@@ -535,7 +615,12 @@ function writeLabelSymSym($splitted,$argument_1,$argument_2,$argument_3,$number)
                 echo ("\t\t<arg2 type=\"int\">" . $argument_2 . "</arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"nil\">" . $argument_3 . "</arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
-            } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
+            } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=([0-9][0-9][0-9]))))*$/", $splitted[3])) {
+                $argument_3= preg_replace("/&/", "&amp;", $argument_3);
+                $argument_3= preg_replace("/\"/", "&quot;", $argument_3);
+                $argument_3= preg_replace("/'/", "&apos;", $argument_3);
+                $argument_3= preg_replace("/>/", "&gt;", $argument_3);
+                $argument_3= preg_replace("/</", "&lt;", $argument_3);
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
                 echo ("\t\t<arg1 type=\"label\">" . $splitted[1] . "</arg1>") . "\n";
                 echo ("\t\t<arg2 type=\"int\">" . $argument_2 . "</arg2>") . "\n";
@@ -546,6 +631,7 @@ function writeLabelSymSym($splitted,$argument_1,$argument_2,$argument_3,$number)
             }
         } elseif (preg_match("/^nil@nil$/", $splitted[2])) {
             if (preg_match("/^(GF|TF|LF)@[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[3])) {
+                $splitted[3]= preg_replace("/&/", "&amp;", $splitted[3]);
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
                 echo ("\t\t<arg1 type=\"label\">" . $splitted[1] . "</arg1>") . "\n";
                 echo ("\t\t<arg2 type=\"nil\">" . $argument_2 . "</arg2>") . "\n";
@@ -557,7 +643,7 @@ function writeLabelSymSym($splitted,$argument_1,$argument_2,$argument_3,$number)
                 echo ("\t\t<arg2 type=\"nil\">" . $argument_2 . "</arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"bool\">" . $argument_3 . "</arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
-            } elseif (preg_match("/^int@[0-9]*/", $splitted[3])) {
+            } elseif (preg_match("/^int@\+{0,1}\-{0,1}[0-9]+/", $splitted[3])) {
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
                 echo ("\t\t<arg1 type=\"label\">" . $splitted[1] . "</arg1>") . "\n";
                 echo ("\t\t<arg2 type=\"nil\">" . $argument_2 . "</arg2>") . "\n";
@@ -569,7 +655,12 @@ function writeLabelSymSym($splitted,$argument_1,$argument_2,$argument_3,$number)
                 echo ("\t\t<arg2 type=\"nil\">" . $argument_2 . "</arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"nil\">" . $argument_3 . "</arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
-            } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
+            } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=([0-9][0-9][0-9]))))*$/", $splitted[3])) {
+                $argument_3= preg_replace("/&/", "&amp;", $argument_3);
+                $argument_3= preg_replace("/\"/", "&quot;", $argument_3);
+                $argument_3= preg_replace("/'/", "&apos;", $argument_3);
+                $argument_3= preg_replace("/>/", "&gt;", $argument_3);
+                $argument_3= preg_replace("/</", "&lt;", $argument_3);
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
                 echo ("\t\t<arg1 type=\"label\">" . $splitted[1] . "</arg1>") . "\n";
                 echo ("\t\t<arg2 type=\"nil\">" . $argument_2 . "</arg2>") . "\n";
@@ -578,8 +669,14 @@ function writeLabelSymSym($splitted,$argument_1,$argument_2,$argument_3,$number)
             } else {
                 exit(23);
             }
-        } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[2])) {
+        } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=([0-9][0-9][0-9]))))*$/", $splitted[2])) {
+            $argument_2= preg_replace("/&/", "&amp;", $argument_2);
+            $argument_2= preg_replace("/\"/", "&quot;", $argument_2);
+            $argument_2= preg_replace("/'/", "&apos;", $argument_2);
+            $argument_2= preg_replace("/>/", "&gt;", $argument_2);
+            $argument_2= preg_replace("/</", "&lt;", $argument_2);
             if (preg_match("/^(GF|TF|LF)@[a-zA-Z\?!\-_\*&%#\$][a-zA-Z0-9\?!\-_\*&%#\$]*$/", $splitted[3])) {
+                $splitted[3]= preg_replace("/&/", "&amp;", $splitted[3]);
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
                 echo ("\t\t<arg1 type=\"label\">" . $splitted[1] . "</arg1>") . "\n";
                 echo ("\t\t<arg2 type=\"string\">" . $argument_2 . "</arg2>") . "\n";
@@ -591,7 +688,7 @@ function writeLabelSymSym($splitted,$argument_1,$argument_2,$argument_3,$number)
                 echo ("\t\t<arg2 type=\"string\">" . $argument_2 . "</arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"bool\">" .$argument_3 . "</arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
-            } elseif (preg_match("/^int@[0-9]*/", $splitted[3])) {
+            } elseif (preg_match("/^int@\+{0,1}\-{0,1}[0-9]+/", $splitted[3])) {
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
                 echo ("\t\t<arg1 type=\"label\">" . $splitted[1] . "</arg1>") . "\n";
                 echo ("\t\t<arg2 type=\"string\">" . $argument_2 . "</arg2>") . "\n";
@@ -603,7 +700,12 @@ function writeLabelSymSym($splitted,$argument_1,$argument_2,$argument_3,$number)
                 echo ("\t\t<arg2 type=\"string\">" . $argument_2 . "</arg2>") . "\n";
                 echo ("\t\t<arg3 type=\"nil\">" . $argument_3 . "</arg3>") . "\n";
                 echo ("\t</instruction>") . "\n";
-            } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=(00[0-9]|0[12][0-9]|03[0-2]|035|092))))*$/", $splitted[3])) {
+            } elseif (preg_match("/^string@([^\\000-\\040\\043\\134]|(\\\\(?=([0-9][0-9][0-9]))))*$/", $splitted[3])) {
+                $argument_3= preg_replace("/&/", "&amp;", $argument_3);
+                $argument_3= preg_replace("/\"/", "&quot;", $argument_3);
+                $argument_3= preg_replace("/'/", "&apos;", $argument_3);
+                $argument_3= preg_replace("/>/", "&gt;", $argument_3);
+                $argument_3= preg_replace("/</", "&lt;", $argument_3);
                 echo("\t<instruction order=\"$number\" opcode=" . strtoupper("\"$splitted[0]\"") . ">\n");
                 echo ("\t\t<arg1 type=\"label\">" . $splitted[1] . "</arg1>") . "\n";
                 echo ("\t\t<arg2 type=\"string\">" . $argument_2 . "</arg2>") . "\n";
